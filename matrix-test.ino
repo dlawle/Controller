@@ -1,4 +1,4 @@
-#include <Adafruit_MCP4725.h>
+o #include <Adafruit_MCP4725.h>
 #include <Keypad.h> 
 #include <Wire.h>
 
@@ -56,11 +56,11 @@ byte colPins[COLS] = {36, 38, 40, 42, 44, 46, 48, 50};
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 const byte GATE = 54;
 
-const int plusPin = 9;    
-const int minusPin = 10; 
-const int plusLed = 3; 
-const int minusLed = 2;
-int switchState = 0;   
+const int plusPin = 30;    
+const int minusPin = 31; 
+const int plusLed = 53; 
+const int minusLed = 52;
+int switchState;   
 
 void setup(){
   dac.begin(0x62);
@@ -75,27 +75,31 @@ void setup(){
 }
 
 void loop(){
-   if (digitalRead(plusPin) == HIGH && digitalRead(minusPin) == LOW) {
+  if (digitalRead(plusPin) == HIGH && digitalRead(minusPin) == LOW) {
+    // turn LED on:
     digitalWrite(plusLed, HIGH);
     digitalWrite(minusLed, LOW);
-    switchState = 1; 
+    switchState=1;
   } else if (digitalRead(plusPin) == LOW && digitalRead(minusPin) == HIGH) {
+    // turn LED on:
     digitalWrite(plusLed, LOW);
     digitalWrite(minusLed, HIGH);
-    switchState = -1; 
-  } else (digitalRead(plusPin) == LOW && digitalRead(minusPin) == LOW); {
+    switchState=-1;
+  } else  {
+    // turn LED on:
     digitalWrite(plusLed, LOW);
     digitalWrite(minusLed, LOW);
-    switchState = 0; 
+    switchState=0;
   }
   char key = keypad.getKey();
   if (key != NO_KEY){
-    Serial.println(key, DEC);
+    Serial.print("Octave wrote:");
+    Serial.println(switchState);
     Serial.print("Voltage wrote:");
     Serial.println(voltOct[key], 3);
     Serial.print("12bit Scale:");
-    Serial.println(voltOct[key]*(4096/5));
-    dac.setVoltage(voltOct[key]*(4096/5), false);
+    Serial.println((voltOct[key]*(4096/5)+switchState));
+    dac.setVoltage((voltOct[key]*(4096/5)+switchState), false);
   }
 }
 
